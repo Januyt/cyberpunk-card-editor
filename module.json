@@ -43,7 +43,7 @@
       "path": "lang/en.json"
     }
   ],
-  "url": "https://example.com/cyberpunk-card-editor",
-  "manifest": "https://example.com/cyberpunk-card-editor/module.json",
-  "download": "https://example.com/cyberpunk-card-editor/cyberpunk-card-editor-1.0.0.zip"
+  "url": "https://github.com/Januyt/cyberpunk-card-editor",
+  "manifest": "https://raw.githubusercontent.com/Januyt/cyberpunk-card-editor/main/module.json",
+  "download": "https://github.com/Januyt/cyberpunk-card-editor/archive/refs/heads/main.zip"
 }
