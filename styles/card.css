@@ -1,0 +1,311 @@
+/* Cyberpunk Card Editor — scoped styles.
+   Everything is namespaced under .cpk-card-app to avoid leaking into Foundry. */
+
+.cpk-card-app {
+  --cpk-red: #ff2636;
+  --cpk-cyan: #00eaff;
+  --cpk-orange: #ff9b21;
+  --cpk-dark: #05070b;
+  --cpk-panel: rgba(5,9,14,.86);
+  --cpk-text: #f5f7ff;
+  --cpk-muted: rgba(245,247,255,.68);
+  --cpk-border: rgba(255,255,255,.12);
+  --cpk-card-w: 380px;
+
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  height: 100%;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,38,54,.22), transparent 32%),
+    radial-gradient(circle at 80% 80%, rgba(0,234,255,.18), transparent 34%),
+    linear-gradient(135deg, #020306, #070812 55%, #020204);
+  color: var(--cpk-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.cpk-card-app .cpk-controls {
+  padding: 12px;
+  background: rgba(0,0,0,.55);
+  border-right: 1px solid var(--cpk-border);
+  overflow-y: auto;
+}
+.cpk-card-app h1 {
+  margin: 0 0 6px;
+  font-size: 16px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--cpk-cyan);
+}
+.cpk-card-app .cpk-help { font-size: 11px; color: var(--cpk-muted); margin: 0 0 12px; }
+
+.cpk-card-app .cpk-group {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--cpk-border);
+  border-radius: 6px;
+}
+.cpk-card-app .cpk-group label {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--cpk-muted); margin-bottom: 8px;
+}
+.cpk-card-app .cpk-group label:last-child { margin-bottom: 0; }
+.cpk-card-app input[type="text"],
+.cpk-card-app input[type="file"],
+.cpk-card-app textarea,
+.cpk-card-app select {
+  background: rgba(0,0,0,.45);
+  color: var(--cpk-text);
+  border: 1px solid var(--cpk-border);
+  border-radius: 4px;
+  padding: 5px 7px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.cpk-card-app input[type="text"]:focus,
+.cpk-card-app textarea:focus,
+.cpk-card-app select:focus {
+  outline: none; border-color: var(--cpk-cyan); box-shadow: 0 0 0 2px rgba(0,234,255,.15);
+}
+
+.cpk-card-app .cpk-stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+}
+.cpk-card-app .cpk-stats-grid label { margin-bottom: 0; }
+
+.cpk-card-app .cpk-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.cpk-card-app .cpk-actions button {
+  padding: 6px 4px;
+  background: rgba(0,234,255,.06);
+  color: var(--cpk-cyan);
+  border: 1px solid rgba(0,234,255,.4);
+  border-radius: 4px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .3px;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.cpk-card-app .cpk-actions button:hover {
+  background: rgba(0,234,255,.15);
+  box-shadow: 0 0 12px rgba(0,234,255,.3);
+}
+.cpk-card-app .cpk-actions .cpk-danger {
+  color: var(--cpk-red); border-color: rgba(255,38,54,.4); background: rgba(255,38,54,.06);
+}
+.cpk-card-app .cpk-actions .cpk-danger:hover { background: rgba(255,38,54,.15); }
+
+/* Preview area */
+.cpk-card-app .cpk-preview {
+  position: relative;
+  display: grid; place-items: center;
+  perspective: 1500px;
+  overflow: hidden;
+}
+
+.cpk-card-app .cpk-card-scene {
+  position: relative;
+  width: var(--cpk-card-w);
+  height: calc(var(--cpk-card-w) * 1.4);
+  transform-style: preserve-3d;
+  transform: rotateY(0deg) rotateX(0deg);
+  transition: transform .25s ease-out;
+  cursor: grab;
+}
+.cpk-card-app .cpk-card-scene:active { cursor: grabbing; }
+
+.cpk-card-app .cpk-card {
+  position: absolute; inset: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+.cpk-card-app .cpk-card-front { transform: rotateY(0deg); }
+.cpk-card-app .cpk-card-back { transform: rotateY(180deg); }
+.cpk-card-app .cpk-card-scene.cpk-flipped { transform: rotateY(180deg); }
+
+.cpk-card-app .cpk-card img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.cpk-card-app .cpk-base-art { z-index: 1; object-fit: cover; }
+
+/* Character photo: clipped to the frame's photo window (measured from
+   exec_base / medtech_base: ~9% / 5.4% / 91% / 65%). The frame artwork
+   sits on top and conceals any pixels that bleed past the rounded corners. */
+.cpk-card-app .cpk-character-art {
+  z-index: 2;
+  /* inset: top right bottom left */
+  clip-path: inset(5.4% 9% 35% 9%);
+  object-fit: cover;       /* default fit, overridable per actor */
+  object-position: center;
+}
+/* Photo fit modes — applied by GM toggle, persisted to actor flag.
+   Class is added to the .cpk-card-front element. */
+.cpk-card-app .cpk-fit-cover    .cpk-character-art { object-fit: cover; }
+.cpk-card-app .cpk-fit-contain  .cpk-character-art { object-fit: contain; background: #000; }
+.cpk-card-app .cpk-fit-blur     .cpk-character-art { object-fit: contain; background: #000; }
+/* Blur-bleed mode: a copy of the image fills the background blurred. The
+   foreground image is then displayed contained on top. Implemented by
+   duplicating the photo as a sibling .cpk-character-art-bg in the template. */
+.cpk-card-app .cpk-character-art-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 1;
+  clip-path: inset(5.4% 9% 35% 9%);
+  object-fit: cover;
+  filter: blur(18px) saturate(1.1) brightness(.7);
+  display: none;
+}
+.cpk-card-app .cpk-fit-blur .cpk-character-art-bg { display: block; }
+
+.cpk-card-app .cpk-frame-art { z-index: 3; pointer-events: none; object-fit: cover; }
+
+.cpk-card-app .cpk-zone {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 6px rgba(0,234,255,.4);
+  pointer-events: none;
+  font-family: 'Orbitron', 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* ---- Default zone positions, measured against the supplied frame artwork
+        (1055x1491). All values are percentages so they survive resizing.
+        Calibration overrides these via inline styles. ---- */
+
+/* Name banner: the small dark slot at the very top of the frame */
+.cpk-card-app .cpk-name {
+  left: 50%; top: 7.4%;
+  font-size: 18px; font-weight: bold; letter-spacing: 2px;
+  text-transform: uppercase; color: #d8b27a;
+}
+/* Subtitle / quote are NOT placed on the card itself — the frame has no slot
+   for them. They remain editable in the panel for use in HTML/PDF exports.
+   We hide them on the rendered card (display:none) instead of positioning. */
+.cpk-card-app .cpk-subtitle, .cpk-card-app .cpk-quote { display: none; }
+
+/* HP / Humanity capsules — positioned over the frame's dedicated boxes */
+.cpk-card-app .cpk-hp-block,
+.cpk-card-app .cpk-humanity-block {
+  font-size: 16px; font-weight: bold;
+  background: transparent; border: none;
+  color: #f0e2c8;
+}
+.cpk-card-app .cpk-hp-block       { left: 25.1%; top: 73.8%; }
+.cpk-card-app .cpk-humanity-block { left: 73.0%; top: 73.8%; }
+/* Hide the "HP " / "HUM " prefixes — the labels are already on the frame. */
+.cpk-card-app .cpk-hp-block       { font-size: 0; }
+.cpk-card-app .cpk-hp-block .cpk-hp,
+.cpk-card-app .cpk-humanity-block .cpk-humanity {
+  font-size: 22px; font-weight: bold; letter-spacing: 1px;
+}
+.cpk-card-app .cpk-humanity-block { font-size: 0; }
+
+/* Stat cells: 9 evenly-spaced columns along the bottom row, digit centered
+   between the label (top of cell) and the icon (bottom of cell). */
+.cpk-card-app [class*="cpk-stat-block-"] {
+  font-size: 18px; font-weight: bold;
+  color: #f0e2c8;
+  background: transparent; border: none;
+  padding: 0;
+}
+.cpk-card-app .cpk-stat-block-INT  { left:  7.27%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-REF  { left: 18.01%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-DEX  { left: 28.75%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-TECH { left: 39.49%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-COOL { left: 50.24%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-WILL { left: 60.98%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-MOVE { left: 71.72%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-BODY { left: 82.46%; top: 90.21%; }
+.cpk-card-app .cpk-stat-block-EMP  { left: 93.21%; top: 90.21%; }
+
+/* Calibration */
+.cpk-card-app .cpk-cal-toggle-btn {
+  position: absolute; bottom: 12px; right: 12px;
+  padding: 6px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+  background: var(--cpk-panel); color: var(--cpk-orange); border: 1px solid rgba(255,155,33,.4);
+  border-radius: 4px; cursor: pointer;
+}
+.cpk-card-app #cpk-cal-panel {
+  position: absolute; left: 12px; right: 12px; bottom: 56px;
+  background: var(--cpk-panel); border: 1px solid var(--cpk-border); border-radius: 6px;
+  padding: 10px; backdrop-filter: blur(8px);
+  max-height: 200px; overflow-y: auto;
+}
+.cpk-card-app .cpk-hidden { display: none !important; }
+.cpk-card-app .cpk-zone-bar {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--cpk-border);
+}
+.cpk-card-app .cpk-zb {
+  padding: 3px 8px; font-size: 10px; border-radius: 3px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--cpk-border);
+  cursor: pointer; user-select: none;
+}
+.cpk-card-app .cpk-zb.active { background: rgba(0,234,255,.15); border-color: var(--cpk-cyan); color: var(--cpk-cyan); }
+.cpk-card-app .cpk-sliders {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.cpk-card-app .cpk-sliders label {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 10px; color: var(--cpk-muted); text-transform: uppercase;
+}
+.cpk-card-app .cpk-sliders input[type="range"] { width: 100%; }
+
+/* Sheet header button */
+.cpk-card-header-btn {
+  color: var(--cpk-cyan, #00eaff) !important;
+  font-weight: bold;
+  cursor: pointer;
+}
+.cpk-card-header-btn:hover { text-shadow: 0 0 6px rgba(0,234,255,.6); }
+
+/* Read-only banner shown to non-owners */
+.cpk-card-app .cpk-readonly-banner {
+  background: rgba(255,38,54,.12);
+  color: #ffb0b8;
+  border: 1px solid rgba(255,38,54,.4);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  text-align: center;
+}
+.cpk-card-app .cpk-readonly input,
+.cpk-card-app .cpk-readonly textarea,
+.cpk-card-app .cpk-readonly select { opacity: .55; cursor: not-allowed; }
+
+/* Group titles + read-only tags */
+.cpk-card-app .cpk-group-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--cpk-cyan);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cpk-card-app .cpk-readonly-tag {
+  font-size: 9px;
+  color: var(--cpk-muted);
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+.cpk-card-app input[disabled] {
+  background: rgba(0,0,0,.25) !important;
+  color: var(--cpk-muted) !important;
+  cursor: default;
+}
+
+/* ----- NPC / Mook simple variant ----- */
+.cpk-card-app .cpk-tag {
+  display: inline-block;
+  font-size: 10px; padding: 2px 7px; margin-left: 6px;
+  background: rgba(255,155,33,.15); color: var(--cpk-orange);
+  border: 1px solid rgba(255,155,33,.4); border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 1px;
+  vertical-align: middle;
+}

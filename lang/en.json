@@ -1,0 +1,14 @@
+{
+  "CPK-CARD.button.openEditor": "🪪 Card",
+  "CPK-CARD.title": "Card Editor — {name}",
+  "CPK-CARD.notify.savedToActor": "Layout saved to actor",
+  "CPK-CARD.notify.cleared": "Layout reset",
+  "CPK-CARD.notify.exported": "Standalone HTML copied to clipboard",
+  "CPK-CARD.notify.noActor": "This macro must be run from an actor sheet",
+  "CPK-CARD.notify.pngDownloaded": "PNG downloaded.",
+  "CPK-CARD.notify.tokenSet": "Card set as actor and prototype token image.",
+  "CPK-CARD.notify.chatPosted": "Card posted to chat.",
+  "CPK-CARD.notify.journalCreated": "Journal Entry created.",
+  "CPK-CARD.notify.uploadFailed": "Upload failed.",
+  "CPK-CARD.notify.notOwner": "You don't own this actor."
+}

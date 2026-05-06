@@ -1,0 +1,14 @@
+{
+  "CPK-CARD.button.openEditor": "🪪 Carte",
+  "CPK-CARD.title": "Éditeur de carte — {name}",
+  "CPK-CARD.notify.savedToActor": "Layout sauvegardé sur l'acteur",
+  "CPK-CARD.notify.cleared": "Layout réinitialisé",
+  "CPK-CARD.notify.exported": "HTML autonome copié dans le presse-papier",
+  "CPK-CARD.notify.noActor": "Cette macro doit être exécutée depuis une fiche d'acteur",
+  "CPK-CARD.notify.pngDownloaded": "PNG téléchargé.",
+  "CPK-CARD.notify.tokenSet": "Carte définie comme image d'acteur et token prototype.",
+  "CPK-CARD.notify.chatPosted": "Carte postée dans le chat.",
+  "CPK-CARD.notify.journalCreated": "Journal Entry créée.",
+  "CPK-CARD.notify.uploadFailed": "Upload échoué.",
+  "CPK-CARD.notify.notOwner": "Tu n'es pas propriétaire de cet acteur."
+}

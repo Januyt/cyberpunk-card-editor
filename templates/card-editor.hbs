@@ -1,0 +1,132 @@
+{{!-- Cyberpunk Card Editor — main template --}}
+<form class="cpk-card-app cpk-actor-{{actorType}}" autocomplete="off">
+
+  <aside class="cpk-controls">
+    <h1>Card Editor {{#if isSimple}}<span class="cpk-tag">{{actorType}}</span>{{/if}}</h1>
+    <p class="cpk-help">Pré-rempli depuis la fiche. Modifie ce que tu veux,
+      "Sauver sur l'acteur" pour conserver entre sessions.</p>
+
+    {{#unless isSimple}}
+    <div class="cpk-group">
+      <label>Rôle
+        <select id="cpk-role-select">
+          {{#each roles}}
+            <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>Background
+        <select id="cpk-bg-select">
+          {{#each backgrounds}}<option value="{{file}}">{{label}}</option>{{/each}}
+        </select>
+      </label>
+    </div>
+    {{/unless}}
+
+    <div class="cpk-group">
+      <label>Photo perso<input type="file" id="cpk-character-file" accept="image/*"></label>
+      <label>Frame override<input type="file" id="cpk-frame-file" accept="image/*"></label>
+      <label>Background override<input type="file" id="cpk-bg-file" accept="image/*"></label>
+      <label>Verso<input type="file" id="cpk-verso-file" accept="image/*"></label>
+      <label>Cadrage photo
+        <select id="cpk-photo-fit">
+          {{#each photoFitOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+    </div>
+
+    <div class="cpk-group">
+      <label>Nom<input type="text" id="cpk-name" value="{{name}}"></label>
+      <label>{{#if isSimple}}Type / Faction{{else}}Surnom{{/if}}<input type="text" id="cpk-subtitle" value="{{subtitle}}"></label>
+      {{#unless isSimple}}
+      <label>Citation<textarea id="cpk-quote" rows="2">{{quote}}</textarea></label>
+      {{/unless}}
+    </div>
+
+    <div class="cpk-group">
+      <p class="cpk-group-title">Stats <span class="cpk-readonly-tag">live depuis la fiche</span></p>
+      <div class="cpk-stats-grid">
+        {{#each stats}}
+          <label>{{@key}}<input type="text" id="cpk-stat-{{@key}}" value="{{this}}" disabled></label>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="cpk-group">
+      <p class="cpk-group-title">Vital <span class="cpk-readonly-tag">live depuis la fiche</span></p>
+      <label>Hit Points<input type="text" id="cpk-hp" value="{{hp}}" disabled></label>
+      {{#unless isSimple}}
+      <label>Humanity<input type="text" id="cpk-humanity" value="{{humanity}}" disabled></label>
+      {{/unless}}
+    </div>
+
+    <div class="cpk-group cpk-actions">
+      <button type="button" id="cpk-save-actor" title="Sauvegarder layout et overrides sur l'acteur">💾 Sauver</button>
+      <button type="button" id="cpk-flip" title="Pivoter la carte">↻ Recto/Verso</button>
+      <button type="button" id="cpk-export-png" title="Télécharger un PNG haute résolution">📷 PNG</button>
+      <button type="button" id="cpk-set-token" title="Définir comme image d'acteur et token prototype">🪪 → Token</button>
+      <button type="button" id="cpk-post-chat" title="Poster la carte dans le chat">💬 Chat</button>
+      <button type="button" id="cpk-create-journal" title="Créer une Journal Entry handout">📓 Journal</button>
+      <button type="button" id="cpk-export-html" title="Copier un HTML autonome dans le presse-papier">📄 HTML</button>
+      <button type="button" id="cpk-reset-layout" class="cpk-danger" title="Effacer overrides et layout">🗑 Reset</button>
+    </div>
+  </aside>
+
+  <main class="cpk-preview">
+    <div class="cpk-card-scene">
+      <div class="cpk-card cpk-card-front cpk-fit-{{photoFit}}">
+        <img class="cpk-base-art" src="{{baseArt}}" alt="" crossorigin="anonymous">
+        <img class="cpk-character-art-bg" src="{{characterArt}}" alt="" crossorigin="anonymous" aria-hidden="true" {{#unless characterArt}}style="display:none"{{/unless}}>
+        <img class="cpk-character-art" src="{{characterArt}}" alt="" crossorigin="anonymous" {{#unless characterArt}}style="display:none"{{/unless}}>
+        <img class="cpk-frame-art" src="{{frameArt}}" alt="" crossorigin="anonymous">
+
+        <div class="cpk-zone cpk-name">{{name}}</div>
+        <div class="cpk-zone cpk-subtitle">{{subtitle}}</div>
+        {{#unless isSimple}}
+        <div class="cpk-zone cpk-quote">{{quote}}</div>
+        {{/unless}}
+        <div class="cpk-zone cpk-hp-block">HP <span class="cpk-hp">{{hp}}</span></div>
+        {{#unless isSimple}}
+        <div class="cpk-zone cpk-humanity-block">HUM <span class="cpk-humanity">{{humanity}}</span></div>
+        {{/unless}}
+
+        {{#each stats}}
+          <div class="cpk-zone cpk-stat-block-{{@key}}">
+            <span class="cpk-stat-{{@key}}">{{this}}</span>
+          </div>
+        {{/each}}
+      </div>
+
+      <div class="cpk-card cpk-card-back">
+        <img class="cpk-verso-art" src="{{versoArt}}" alt="" crossorigin="anonymous">
+      </div>
+    </div>
+
+    <button type="button" id="cpk-cal-toggle" class="cpk-cal-toggle-btn">⚙ Calibrer</button>
+    <div id="cpk-cal-panel" class="cpk-hidden">
+      <div id="cpk-cal-zonebar" class="cpk-zone-bar">
+        <div class="cpk-zb active" data-z="name">Nom</div>
+        <div class="cpk-zb" data-z="subtitle">Surnom</div>
+        {{#unless isSimple}}
+        <div class="cpk-zb" data-z="quote">Quote</div>
+        {{/unless}}
+        <div class="cpk-zb" data-z="hp">HP</div>
+        {{#unless isSimple}}
+        <div class="cpk-zb" data-z="hum">HUM</div>
+        {{/unless}}
+        <div class="cpk-zb" data-z="stat_INT">INT</div>
+        <div class="cpk-zb" data-z="stat_REF">REF</div>
+        <div class="cpk-zb" data-z="stat_DEX">DEX</div>
+        <div class="cpk-zb" data-z="stat_TECH">TECH</div>
+        <div class="cpk-zb" data-z="stat_COOL">COOL</div>
+        <div class="cpk-zb" data-z="stat_WILL">WILL</div>
+        <div class="cpk-zb" data-z="stat_MOVE">MOVE</div>
+        <div class="cpk-zb" data-z="stat_BODY">BODY</div>
+        <div class="cpk-zb" data-z="stat_EMP">EMP</div>
+      </div>
+      <div id="cpk-cal-sliders" class="cpk-sliders"></div>
+    </div>
+  </main>
+</form>
