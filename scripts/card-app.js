@@ -288,6 +288,24 @@ export class CyberpunkCardApp extends FormApplication {
       versoArt:     ".cpk-verso-art"
     };
 
+    // Bouton "Depuis le PC" → déclenche un <input type="file"> natif
+    const localBtn = root.querySelector(".cpk-local-btn[data-key='characterArt']");
+    const localFile = root.querySelector("#cpk-character-file");
+    const charImg = root.querySelector(".cpk-character-art");
+    if (localBtn && localFile && charImg) {
+      localBtn.addEventListener("click", () => localFile.click());
+      localFile.addEventListener("change", async (ev) => {
+        const file = ev.target.files?.[0];
+        if (!file) return;
+        const dataUrl = await this._fileToDataUrl(file);
+        charImg.src = dataUrl;
+        charImg.style.display = "block";
+        this._overrides.characterArt = dataUrl;
+        if (bgCopy) { bgCopy.src = dataUrl; bgCopy.style.display = ""; }
+      });
+    }
+
+    // Boutons FilePicker → frame, bg, verso (fichiers côté serveur Foundry)
     root.querySelectorAll(".cpk-fp-btn[data-key]").forEach(btn => {
       const key = btn.dataset.key;
       const imgSel = imgMap[key];
@@ -302,10 +320,6 @@ export class CyberpunkCardApp extends FormApplication {
             img.src = path;
             img.style.display = "block";
             this._overrides[key] = path;
-            if (key === "characterArt" && bgCopy) {
-              bgCopy.src = path;
-              bgCopy.style.display = "";
-            }
           }
         }).render(true);
       });

@@ -193,8 +193,8 @@
   background: transparent; border: none;
   color: #f0e2c8;
 }
-.cpk-card-app .cpk-hp-block       { left: 25.1%; top: 73.8%; }
-.cpk-card-app .cpk-humanity-block { left: 73.0%; top: 73.8%; }
+.cpk-card-app .cpk-hp-block       { left: 24.5%; top: 74.5%; }
+.cpk-card-app .cpk-humanity-block { left: 73.5%; top: 74.5%; }
 /* Hide the "HP " / "HUM " prefixes — the labels are already on the frame. */
 .cpk-card-app .cpk-hp-block       { font-size: 0; }
 .cpk-card-app .cpk-hp-block .cpk-hp,
@@ -206,26 +206,23 @@
 /* Stat cells: 9 evenly-spaced columns along the bottom row, digit centered
    between the label (top of cell) and the icon (bottom of cell). */
 .cpk-card-app [class*="cpk-stat-block-"] {
-  font-size: 18px; font-weight: bold;
+  font-size: 14px; font-weight: bold;
   color: #f0e2c8;
   background: transparent; border: none;
   padding: 0;
 }
-.cpk-card-app .cpk-stat-block-INT  { left:  7.27%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-REF  { left: 18.01%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-DEX  { left: 28.75%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-TECH { left: 39.49%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-COOL { left: 50.24%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-WILL { left: 60.98%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-MOVE { left: 71.72%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-BODY { left: 82.46%; top: 90.21%; }
-.cpk-card-app .cpk-stat-block-EMP  { left: 93.21%; top: 90.21%; }
+/* Positions calées sur les cellules hexagonales du frame (mesurées sur la frame 380×532) */
+.cpk-card-app .cpk-stat-block-INT  { left:  6.8%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-REF  { left: 17.8%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-DEX  { left: 28.8%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-TECH { left: 39.8%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-COOL { left: 50.5%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-WILL { left: 61.2%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-MOVE { left: 72.0%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-BODY { left: 82.8%; top: 88.5%; }
+.cpk-card-app .cpk-stat-block-EMP  { left: 93.5%; top: 88.5%; }
 
-/* Stats, HP et Humanity sont déjà intégrés dans l'artwork du frame Foundry.
-   On masque les zones texte superposées pour éviter le doublon. */
-.cpk-card-app [class*="cpk-stat-block-"],
-.cpk-card-app .cpk-hp-block,
-.cpk-card-app .cpk-humanity-block { display: none !important; }
+/* Stats et vitals affichés dans les cellules du frame */
 
 /* Bouton FilePicker natif Foundry */
 .cpk-card-app .cpk-fp-btn {
