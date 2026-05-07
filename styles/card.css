@@ -221,6 +221,27 @@
 .cpk-card-app .cpk-stat-block-BODY { left: 82.46%; top: 90.21%; }
 .cpk-card-app .cpk-stat-block-EMP  { left: 93.21%; top: 90.21%; }
 
+/* Stats, HP et Humanity sont déjà intégrés dans l'artwork du frame Foundry.
+   On masque les zones texte superposées pour éviter le doublon. */
+.cpk-card-app [class*="cpk-stat-block-"],
+.cpk-card-app .cpk-hp-block,
+.cpk-card-app .cpk-humanity-block { display: none !important; }
+
+/* Bouton FilePicker natif Foundry */
+.cpk-card-app .cpk-fp-btn {
+  width: 100%;
+  padding: 5px 8px;
+  background: rgba(0,234,255,.06);
+  color: var(--cpk-cyan);
+  border: 1px solid rgba(0,234,255,.35);
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s;
+}
+.cpk-card-app .cpk-fp-btn:hover { background: rgba(0,234,255,.15); }
+
 /* Calibration */
 .cpk-card-app .cpk-cal-toggle-btn {
   position: absolute; bottom: 12px; right: 12px;

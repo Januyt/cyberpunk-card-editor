@@ -280,31 +280,36 @@ export class CyberpunkCardApp extends FormApplication {
   }
 
   _bindFiles(root) {
-    const filePairs = [
-      ["#cpk-character-file", "characterArt", ".cpk-character-art"],
-      ["#cpk-frame-file", "frameArt", ".cpk-frame-art"],
-      ["#cpk-bg-file", "baseArt", ".cpk-base-art"],
-      ["#cpk-verso-file", "versoArt", ".cpk-verso-art"]
-    ];
     const bgCopy = root.querySelector(".cpk-character-art-bg");
-    for (const [inputSel, key, imgSel] of filePairs) {
-      const inp = root.querySelector(inputSel);
-      const img = root.querySelector(imgSel);
-      if (!inp || !img) continue;
-      inp.addEventListener("change", async (ev) => {
-        const file = ev.target.files?.[0];
-        if (!file) return;
-        const dataUrl = await this._fileToDataUrl(file);
-        img.src = dataUrl;
-        img.style.display = "block";
-        this._overrides[key] = dataUrl;
-        // Keep the blur-bleed background in sync when the foreground photo changes.
-        if (key === "characterArt" && bgCopy) {
-          bgCopy.src = dataUrl;
-          bgCopy.style.display = "";
-        }
+    const imgMap = {
+      characterArt: ".cpk-character-art",
+      frameArt:     ".cpk-frame-art",
+      baseArt:      ".cpk-base-art",
+      versoArt:     ".cpk-verso-art"
+    };
+
+    root.querySelectorAll(".cpk-fp-btn[data-key]").forEach(btn => {
+      const key = btn.dataset.key;
+      const imgSel = imgMap[key];
+      const img = imgSel ? root.querySelector(imgSel) : null;
+      if (!img) return;
+
+      btn.addEventListener("click", () => {
+        new FilePicker({
+          type: "image",
+          current: this._overrides[key] ?? "",
+          callback: (path) => {
+            img.src = path;
+            img.style.display = "block";
+            this._overrides[key] = path;
+            if (key === "characterArt" && bgCopy) {
+              bgCopy.src = path;
+              bgCopy.style.display = "";
+            }
+          }
+        }).render(true);
       });
-    }
+    });
   }
 
   _bindRoleAndBg(root) {
@@ -499,6 +504,28 @@ export class CyberpunkCardApp extends FormApplication {
    * Temporarily resets the 3D rotation and hides the back face so html2canvas
    * captures a clean 2D snapshot.
    */
+  /**
+   * Convertit le src d'une <img> en data URL via fetch, pour que html2canvas
+   * puisse lire les images hébergées sur le serveur Foundry sans erreur CORS.
+   */
+  async _imgToDataUrl(img) {
+    const src = img.getAttribute("src");
+    if (!src || src.startsWith("data:")) return;
+    try {
+      const resp = await fetch(src, { cache: "force-cache" });
+      const blob = await resp.blob();
+      const dataUrl = await new Promise(res => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      });
+      img.src = dataUrl;
+      return src; // retourne le src original pour restauration
+    } catch {
+      return null;
+    }
+  }
+
   async _exportPng({ download = false, scale = 2 } = {}) {
     const html2canvas = await loadHtml2Canvas().catch(err => {
       ui.notifications.error("html2canvas n'a pas pu se charger.");
@@ -506,8 +533,15 @@ export class CyberpunkCardApp extends FormApplication {
     });
 
     const scene = this._cardScene;
-    if (!scene) return null;
+    const front = this._root?.querySelector(".cpk-card-front");
+    if (!scene || !front) return null;
 
+    // Aplatir toutes les images en data URL pour contourner les restrictions CORS
+    const imgEls = Array.from(front.querySelectorAll("img[src]"));
+    const origSrcs = imgEls.map(i => i.getAttribute("src"));
+    await Promise.all(imgEls.map(i => this._imgToDataUrl(i)));
+
+    // Figer la scène en vue frontale pour la capture
     const sceneTransform = scene.style.transform;
     const sceneTransition = scene.style.transition;
     const back = this._root.querySelector(".cpk-card-back");
@@ -519,14 +553,16 @@ export class CyberpunkCardApp extends FormApplication {
 
     let canvas;
     try {
-      canvas = await html2canvas(scene, {
+      canvas = await html2canvas(front, {
         backgroundColor: null,
         scale,
-        useCORS: true,
-        logging: false,
-        allowTaint: true
+        useCORS: false,
+        allowTaint: false,
+        logging: false
       });
     } finally {
+      // Restaurer les src originaux et la 3D
+      imgEls.forEach((img, i) => { if (origSrcs[i]) img.src = origSrcs[i]; });
       scene.style.transform = sceneTransform;
       scene.style.transition = sceneTransition;
       if (back) back.style.display = backDisplay ?? "";
