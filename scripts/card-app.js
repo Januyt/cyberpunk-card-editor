@@ -337,11 +337,33 @@ export class CyberpunkCardApp extends FormApplication {
       localFile.addEventListener("change", async (ev) => {
         const file = ev.target.files?.[0];
         if (!file) return;
-        const dataUrl = await this._fileToDataUrl(file);
-        charImg.src = dataUrl;
+
+        // Affiche immédiatement via object URL (aucune attente, aucun CORS)
+        const objectUrl = URL.createObjectURL(file);
+        charImg.removeAttribute("crossorigin");
+        charImg.src = objectUrl;
+        charImg.style.removeProperty("display"); // retire display:none inline
         charImg.style.display = "block";
-        this._overrides.characterArt = dataUrl;
-        if (bgCopy) { bgCopy.src = dataUrl; bgCopy.style.display = ""; }
+        if (bgCopy) {
+          bgCopy.removeAttribute("crossorigin");
+          bgCopy.src = objectUrl;
+          bgCopy.style.removeProperty("display");
+          bgCopy.style.display = "";
+        }
+        ui.notifications.info(`📷 Photo chargée : ${file.name}`);
+
+        // Convertit en data URL pour la persistance (save + export PNG)
+        try {
+          const dataUrl = await this._fileToDataUrl(file);
+          this._overrides.characterArt = dataUrl;
+          charImg.src = dataUrl;
+          if (bgCopy) bgCopy.src = dataUrl;
+          URL.revokeObjectURL(objectUrl);
+        } catch (err) {
+          // Garde l'object URL pour la session si la conversion échoue
+          this._overrides.characterArt = objectUrl;
+          ui.notifications.warn("Photo visible mais non persistante (erreur de conversion).");
+        }
       });
     }
 
