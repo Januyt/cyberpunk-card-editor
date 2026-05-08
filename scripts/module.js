@@ -10,6 +10,16 @@ const MODULE_ID = "cyberpunk-card-editor";
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
 
+  // Stocke les layouts de calibration par rôle (partagés entre tous les acteurs du même rôle).
+  // Seul le GM peut écrire, mais tous peuvent lire.
+  game.settings.register(MODULE_ID, "roleLayouts", {
+    name: "Calibration par rôle",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
   // Expose for macros / debugging
   game.modules.get(MODULE_ID).api = {
     open: (actor) => new CyberpunkCardApp(actor).render(true),

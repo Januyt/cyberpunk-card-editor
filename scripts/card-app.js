@@ -111,8 +111,16 @@ export class CyberpunkCardApp extends FormApplication {
     // Observers can still open the editor and use export/share, but cannot mutate.
     this.canEdit = actor.isOwner || game.user.isGM;
     this.readOnly = !this.canEdit;
-    this._layout = foundry.utils.deepClone(actor.getFlag(MODULE_ID, "layout") ?? {});
     this._overrides = foundry.utils.deepClone(actor.getFlag(MODULE_ID, "overrides") ?? {});
+    // Layout : priorité 1 = flag perso sur l'acteur, priorité 2 = preset global du rôle.
+    const personalLayout = actor.getFlag(MODULE_ID, "layout") ?? {};
+    if (Object.keys(personalLayout).length > 0) {
+      this._layout = foundry.utils.deepClone(personalLayout);
+    } else {
+      const role = this._overrides.role ?? detectRole(actor);
+      const presets = game.settings.get(MODULE_ID, "roleLayouts") ?? {};
+      this._layout = foundry.utils.deepClone(presets[role] ?? {});
+    }
     // Migration: stats are no longer overridable — they always come from the
     // actor sheet now. Strip any stale stat_* / hp / humanity overrides that
     // earlier versions may have stored, so we don't hide a real stat change.
@@ -381,6 +389,16 @@ export class CyberpunkCardApp extends FormApplication {
       await this.actor.setFlag(MODULE_ID, "layout", this._layout);
       await this.actor.setFlag(MODULE_ID, "overrides", this._overrides);
       ui.notifications.info(game.i18n.localize("CPK-CARD.notify.savedToActor"));
+    });
+
+    // Sauver le layout courant comme preset global pour ce rôle (GM only).
+    root.querySelector("#cpk-save-role-preset")?.addEventListener("click", async () => {
+      if (!game.user.isGM) { ui.notifications.warn("Seul le GM peut modifier les presets de rôle."); return; }
+      const role = this._overrides.role ?? detectRole(this.actor);
+      const presets = foundry.utils.deepClone(game.settings.get(MODULE_ID, "roleLayouts") ?? {});
+      presets[role] = foundry.utils.deepClone(this._layout);
+      await game.settings.set(MODULE_ID, "roleLayouts", presets);
+      ui.notifications.info(`✅ Calibration sauvée comme défaut pour le rôle "${role}".`);
     });
 
     root.querySelector("#cpk-reset-layout")?.addEventListener("click", async () => {
