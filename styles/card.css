@@ -131,28 +131,32 @@
 }
 .cpk-card-app .cpk-base-art { z-index: 1; object-fit: cover; }
 
-/* Character photo: clipped to the frame's photo window (measured from
-   exec_base / medtech_base: ~9% / 5.4% / 91% / 65%). The frame artwork
-   sits on top and conceals any pixels that bleed past the rounded corners. */
-.cpk-card-app .cpk-character-art {
+/* ── Fenêtre photo ──────────────────────────────────────────────────────────
+   Conteneur positionné sur la fenêtre du frame. overflow:hidden découpe
+   l'image proprement sans clip-path. JS positionne via _applyLayout().      */
+.cpk-card-app .cpk-photo-window {
+  position: absolute;
   z-index: 2;
-  /* inset: top right bottom left */
-  clip-path: inset(5.4% 9% 35% 9%);
-  object-fit: cover;       /* default fit, overridable per actor */
-  object-position: center;
+  overflow: hidden;
+  /* Valeurs par défaut — écrasées par JS selon le rôle */
+  top: 6%; left: 9%; width: 82%; height: 59.5%;
 }
-/* Photo fit modes — applied by GM toggle, persisted to actor flag.
-   Class is added to the .cpk-card-front element. */
-.cpk-card-app .cpk-fit-cover    .cpk-character-art { object-fit: cover; }
-.cpk-card-app .cpk-fit-contain  .cpk-character-art { object-fit: contain; background: #000; }
-.cpk-card-app .cpk-fit-blur     .cpk-character-art { object-fit: contain; background: #000; }
-/* Blur-bleed mode: a copy of the image fills the background blurred. The
-   foreground image is then displayed contained on top. Implemented by
-   duplicating the photo as a sibling .cpk-character-art-bg in the template. */
+.cpk-card-app .cpk-photo-window img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cpk-card-app .cpk-character-art {
+  object-fit: cover;
+  object-position: center top;
+}
+/* Photo fit modes */
+.cpk-card-app .cpk-fit-cover   .cpk-character-art { object-fit: cover; }
+.cpk-card-app .cpk-fit-contain .cpk-character-art { object-fit: contain; background: #000; }
+.cpk-card-app .cpk-fit-blur    .cpk-character-art { object-fit: contain; }
+/* Blur-bleed : fond flouté + photo contenue au-dessus */
 .cpk-card-app .cpk-character-art-bg {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  z-index: 1;
-  clip-path: inset(5.4% 9% 35% 9%);
   object-fit: cover;
   filter: blur(18px) saturate(1.1) brightness(.7);
   display: none;

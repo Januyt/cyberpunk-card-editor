@@ -66,8 +66,13 @@
     <div class="cpk-card-scene">
       <div class="cpk-card cpk-card-front cpk-fit-{{photoFit}}">
         <img class="cpk-base-art" src="{{baseArt}}" alt="" crossorigin="anonymous">
-        <img class="cpk-character-art-bg" src="{{characterArt}}" alt="" crossorigin="anonymous" aria-hidden="true" {{#unless characterArt}}style="display:none"{{/unless}}>
-        <img class="cpk-character-art" src="{{characterArt}}" alt="" crossorigin="anonymous" {{#unless characterArt}}style="display:none"{{/unless}}>
+
+        {{!-- Fenêtre photo : conteneur positionné + overflow:hidden pour découper l'image --}}
+        <div class="cpk-photo-window">
+          <img class="cpk-character-art-bg" src="{{characterArt}}" alt="" aria-hidden="true" {{#unless characterArt}}style="display:none"{{/unless}}>
+          <img class="cpk-character-art" src="{{characterArt}}" alt="" {{#unless characterArt}}style="display:none"{{/unless}}>
+        </div>
+
         <img class="cpk-frame-art" src="{{frameArt}}" alt="" crossorigin="anonymous">
 
         <div class="cpk-zone cpk-name">{{name}}</div>

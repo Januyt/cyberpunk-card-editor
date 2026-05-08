@@ -340,15 +340,11 @@ export class CyberpunkCardApp extends FormApplication {
 
         // Affiche immédiatement via object URL (aucune attente, aucun CORS)
         const objectUrl = URL.createObjectURL(file);
-        charImg.removeAttribute("crossorigin");
         charImg.src = objectUrl;
-        charImg.style.removeProperty("display"); // retire display:none inline
-        charImg.style.display = "block";
+        charImg.style.removeProperty("display");
         if (bgCopy) {
-          bgCopy.removeAttribute("crossorigin");
           bgCopy.src = objectUrl;
           bgCopy.style.removeProperty("display");
-          bgCopy.style.display = "";
         }
         ui.notifications.info(`📷 Photo chargée : ${file.name}`);
 
@@ -565,13 +561,15 @@ export class CyberpunkCardApp extends FormApplication {
     const role = this._overrides.role ?? detectRole(this.actor);
     const cal = ROLE_CAL[role] ?? ROLE_CAL.solo;
 
-    // ── Couche 1 : photo perso clippée à la fenêtre du frame ──
+    // ── Couche 1 : positionne le conteneur photo sur la fenêtre du frame ──
     const { t, r, b, l: lp } = cal.photo;
-    const clip = `inset(${t}% ${r}% ${b}% ${lp}%)`;
-    const charArt = this._root?.querySelector(".cpk-character-art");
-    const charBg  = this._root?.querySelector(".cpk-character-art-bg");
-    if (charArt) charArt.style.clipPath = clip;
-    if (charBg)  charBg.style.clipPath  = clip;
+    const photoWin = this._root?.querySelector(".cpk-photo-window");
+    if (photoWin) {
+      photoWin.style.top    = `${t}%`;
+      photoWin.style.left   = `${lp}%`;
+      photoWin.style.width  = `${100 - lp - r}%`;
+      photoWin.style.height = `${100 - t - b}%`;
+    }
 
     // ── Couche 2 : stats et HP/HUM avec positions par défaut du rôle ──
     const applyZone = (el, x, y, fsPx) => {
