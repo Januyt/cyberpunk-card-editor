@@ -222,7 +222,8 @@
 .cpk-card-app .cpk-stat-block-BODY { left: 82.8%; top: 88.5%; }
 .cpk-card-app .cpk-stat-block-EMP  { left: 93.5%; top: 88.5%; }
 
-/* Stats et vitals affichés dans les cellules du frame */
+/* Stats et vitals : positions initiales gérées par JS (ROLE_CAL dans card-app.js).
+   Les règles CSS ci-dessous sont des fallbacks uniquement. */
 
 /* Bouton FilePicker natif Foundry */
 .cpk-card-app .cpk-fp-btn {

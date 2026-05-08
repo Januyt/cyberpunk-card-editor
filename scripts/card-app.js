@@ -29,6 +29,40 @@ const ROLE_LABELS = {
 
 const STATS_ORDER = ["INT", "REF", "DEX", "TECH", "COOL", "WILL", "MOVE", "BODY", "EMP"];
 
+// ---------- Calibrations par défaut par rôle ----------
+// Positions en % de la largeur/hauteur de la carte (380×532px rendu).
+// x/y = centre de l'élément (transform: translate(-50%,-50%) appliqué).
+// Ajustables via l'outil Calibrer → bouton "📐 Défaut rôle" pour sauver.
+
+const STAT_X = {          // X partagés (cellules régulièrement espacées)
+  INT:  7.0, REF: 17.9, DEX: 28.8, TECH: 39.6,
+  COOL: 50.5, WILL: 61.3, MOVE: 72.2, BODY: 83.0, EMP: 93.9
+};
+const STAT_FONT = { BODY: 12, EMP: 12 };  // police réduite pour cellules serrées
+
+const ROLE_CAL = {
+  solo:      { sy: 91.5, hp: [25.8, 73.2], hum: [67.0, 73.2],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  fixer:     { sy: 91.8, hp: [25.8, 73.0], hum: [67.0, 73.0],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  lawman:    { sy: 91.8, hp: [25.8, 72.5], hum: [67.0, 72.5],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  media:     { sy: 91.5, hp: [26.0, 73.2], hum: [67.2, 73.2],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  medtech:   { sy: 91.8, hp: [25.8, 72.5], hum: [67.0, 72.5],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  netrunner: { sy: 91.5, hp: [25.8, 73.0], hum: [67.0, 73.0],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  nomad:     { sy: 91.8, hp: [25.8, 72.5], hum: [67.0, 72.5],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  rockerboy: { sy: 91.5, hp: [25.8, 73.0], hum: [67.0, 73.0],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  exec:      { sy: 91.5, hp: [25.8, 73.0], hum: [67.0, 73.0],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+  tech:      { sy: 91.8, hp: [25.8, 72.8], hum: [67.0, 72.8],
+               photo: { t: 6.0, r: 9.0, b: 34.5, l: 9.0 } },
+};
+
 // ---------- Data readers (defensive against system version drift) ----------
 
 function readStat(actor, statKey) {
@@ -508,22 +542,53 @@ export class CyberpunkCardApp extends FormApplication {
   }
 
   _applyLayout() {
-    const map = {
-      name: ".cpk-name",
-      subtitle: ".cpk-subtitle",
-      hp: ".cpk-hp-block",
-      hum: ".cpk-humanity-block",
-      quote: ".cpk-quote",
+    const role = this._overrides.role ?? detectRole(this.actor);
+    const cal = ROLE_CAL[role] ?? ROLE_CAL.solo;
+
+    // ── Couche 1 : photo perso clippée à la fenêtre du frame ──
+    const { t, r, b, l: lp } = cal.photo;
+    const clip = `inset(${t}% ${r}% ${b}% ${lp}%)`;
+    const charArt = this._root?.querySelector(".cpk-character-art");
+    const charBg  = this._root?.querySelector(".cpk-character-art-bg");
+    if (charArt) charArt.style.clipPath = clip;
+    if (charBg)  charBg.style.clipPath  = clip;
+
+    // ── Couche 2 : stats et HP/HUM avec positions par défaut du rôle ──
+    const applyZone = (el, x, y, fsPx) => {
+      if (!el) return;
+      el.style.left = `${x}%`;
+      el.style.top  = `${y}%`;
+      el.style.transform = "translate(-50%, -50%)";
+      if (fsPx) el.style.fontSize = `${fsPx}px`;
+    };
+
+    // HP / Humanity
+    const hpEl  = this._root?.querySelector(".cpk-hp-block");
+    const humEl = this._root?.querySelector(".cpk-humanity-block");
+    if (!this._layout.hp)  applyZone(hpEl,  cal.hp[0],  cal.hp[1]);
+    if (!this._layout.hum) applyZone(humEl, cal.hum[0], cal.hum[1]);
+
+    // Stats individuelles
+    for (const stat of STATS_ORDER) {
+      const el = this._root?.querySelector(`.cpk-stat-block-${stat}`);
+      if (!this._layout[`stat_${stat}`])
+        applyZone(el, STAT_X[stat], cal.sy, STAT_FONT[stat] ?? 14);
+    }
+
+    // ── Surcharges personnelles (calibration manuelle) ──
+    const overrideMap = {
+      name: ".cpk-name", subtitle: ".cpk-subtitle",
+      hp: ".cpk-hp-block", hum: ".cpk-humanity-block", quote: ".cpk-quote",
       ...Object.fromEntries(STATS_ORDER.map(s => [`stat_${s}`, `.cpk-stat-block-${s}`]))
     };
-    for (const [zone, sel] of Object.entries(map)) {
+    for (const [zone, sel] of Object.entries(overrideMap)) {
+      const lz = this._layout[zone];
+      if (!lz) continue;
       const el = this._root?.querySelector(sel);
       if (!el) continue;
-      const l = this._layout[zone];
-      if (!l) continue;
-      el.style.left = `${l.x}%`;
-      el.style.top = `${l.y}%`;
-      el.style.transform = `translate(-50%, -50%) scale(${l.scale}) rotate(${l.rot}deg)`;
+      el.style.left = `${lz.x}%`;
+      el.style.top  = `${lz.y}%`;
+      el.style.transform = `translate(-50%, -50%) scale(${lz.scale}) rotate(${lz.rot}deg)`;
     }
   }
 
