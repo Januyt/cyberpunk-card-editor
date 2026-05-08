@@ -338,8 +338,13 @@ export class CyberpunkCardApp extends FormApplication {
         const file = ev.target.files?.[0];
         if (!file) return;
 
-        // Affiche immédiatement via object URL (aucune attente, aucun CORS)
+        // Stocke IMMÉDIATEMENT le blob URL dans les overrides.
+        // Si Foundry re-rend l'app pendant l'opération async (ce qu'il fait
+        // quand la fenêtre de fichier se ferme), getData() trouvera la photo
+        // et la template la réaffichera sans flash.
         const objectUrl = URL.createObjectURL(file);
+        this._overrides.characterArt = objectUrl;   // ← synchrone, avant tout await
+
         charImg.src = objectUrl;
         charImg.style.removeProperty("display");
         if (bgCopy) {
@@ -349,6 +354,7 @@ export class CyberpunkCardApp extends FormApplication {
         ui.notifications.info(`📷 Photo chargée : ${file.name}`);
 
         // Convertit en data URL pour la persistance (save + export PNG)
+        // Le blob URL restera valide jusqu'à la révocation ci-dessous.
         try {
           const dataUrl = await this._fileToDataUrl(file);
           this._overrides.characterArt = dataUrl;
@@ -356,8 +362,6 @@ export class CyberpunkCardApp extends FormApplication {
           if (bgCopy) bgCopy.src = dataUrl;
           URL.revokeObjectURL(objectUrl);
         } catch (err) {
-          // Garde l'object URL pour la session si la conversion échoue
-          this._overrides.characterArt = objectUrl;
           ui.notifications.warn("Photo visible mais non persistante (erreur de conversion).");
         }
       });
