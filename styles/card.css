@@ -225,6 +225,34 @@
 /* Stats et vitals : positions initiales gérées par JS (ROLE_CAL dans card-app.js).
    Les règles CSS ci-dessous sont des fallbacks uniquement. */
 
+/* Label "Photo depuis le PC" — cache le <input type=file> natif sous le label */
+.cpk-card-app .cpk-file-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 8px;
+  background: rgba(0,234,255,.06);
+  color: var(--cpk-cyan);
+  border: 1px solid rgba(0,234,255,.35);
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.cpk-card-app .cpk-file-label:hover { background: rgba(0,234,255,.15); }
+.cpk-card-app .cpk-file-label input[type="file"] {
+  /* Masque l'input natif tout en restant cliquable via le label */
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Bouton FilePicker natif Foundry */
 .cpk-card-app .cpk-fp-btn {
   width: 100%;

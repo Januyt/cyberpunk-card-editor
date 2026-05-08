@@ -330,12 +330,10 @@ export class CyberpunkCardApp extends FormApplication {
       versoArt:     ".cpk-verso-art"
     };
 
-    // Bouton "Depuis le PC" → déclenche un <input type="file"> natif
-    const localBtn = root.querySelector(".cpk-local-btn[data-key='characterArt']");
+    // Input fichier natif (label overlay) → photo depuis le PC
     const localFile = root.querySelector("#cpk-character-file");
     const charImg = root.querySelector(".cpk-character-art");
-    if (localBtn && localFile && charImg) {
-      localBtn.addEventListener("click", () => localFile.click());
+    if (localFile && charImg) {
       localFile.addEventListener("change", async (ev) => {
         const file = ev.target.files?.[0];
         if (!file) return;
