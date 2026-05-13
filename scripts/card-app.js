@@ -490,31 +490,80 @@ export class CyberpunkCardApp extends FormApplication {
   }
 
   _bindRotation(root) {
-    let dragging = false, sx = 0, sy = 0, rx = 0, ry = 0;
+    let rx = 0, ry = 0, vx = 0, vy = 0, dragging = false, lx = 0, ly = 0, raf = null;
+    const SENS = 0.45, FRIC = 0.88, RET = 0.04;
+
     const scene = this._cardScene;
     if (!scene) return;
-    scene.style.transition = "transform .12s ease-out";
+    const front = root.querySelector(".cpk-card-front");
+    const l3    = front?.querySelector(".cpk-layer-3");
+    const l4    = front?.querySelector(".cpk-layer-4");
+    const sheen = front?.querySelector(".cpk-sheen");
+
+    const applyTransform = () => {
+      scene.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      // Layers 3 & 4 : décalage XY inverse à la rotation → illusion de flottement
+      if (l3) l3.style.transform = `translateX(${-ry * 0.25}px) translateY(${rx * 0.25}px)`;
+      if (l4) l4.style.transform = `translateX(${-ry * 0.55}px) translateY(${rx * 0.55}px)`;
+      // Reflet holographique qui suit l'inclinaison
+      if (sheen) {
+        const px = (ry / 40 + 0.5) * 100;
+        const py = (-rx / 40 + 0.5) * 100;
+        sheen.style.background = `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.22) 0%, transparent 55%)`;
+        sheen.style.opacity = (Math.abs(rx) + Math.abs(ry)) > 3 ? "1" : "0";
+      }
+    };
+
+    // Inertie : la carte continue sur sa lancée puis revient au centre
+    const inertia = () => {
+      if (dragging) return;
+      ry += vx; rx -= vy;
+      if (Math.abs(vx) < 0.5 && Math.abs(vy) < 0.5) {
+        rx += (0 - rx) * RET;
+        ry += (0 - ry) * RET;
+      }
+      rx = Math.max(-60, Math.min(60, rx));
+      vx *= FRIC; vy *= FRIC;
+      applyTransform();
+      if (Math.abs(vx) > 0.01 || Math.abs(vy) > 0.01 || Math.abs(rx) > 0.1 || Math.abs(ry) > 0.1)
+        raf = requestAnimationFrame(inertia);
+    };
 
     const onDown = (e) => {
-      if (e.target.closest("input, textarea, button, select, label, .cpk-zone-bar, .cpk-sliders")) return;
-      dragging = true;
-      sx = e.clientX; sy = e.clientY;
-      const m = scene.style.transform.match(/rotateY\(([^)]+)\).*rotateX\(([^)]+)\)/);
-      if (m) { ry = parseFloat(m[1]); rx = parseFloat(m[2]); }
-      scene.style.transition = "none";
+      if (e.target.closest("input,textarea,button,select,label,.cpk-zone-bar,.cpk-sliders")) return;
+      dragging = true; lx = e.clientX; ly = e.clientY; vx = 0; vy = 0;
+      scene.style.cursor = "grabbing";
+      cancelAnimationFrame(raf);
     };
     const onMove = (e) => {
       if (!dragging) return;
-      const dx = e.clientX - sx, dy = e.clientY - sy;
-      scene.style.transform = `rotateY(${ry + dx * 0.4}deg) rotateX(${rx - dy * 0.4}deg)`;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      lx = e.clientX; ly = e.clientY;
+      vx = dx * SENS; vy = dy * SENS;
+      ry += vx; rx -= vy;
+      rx = Math.max(-60, Math.min(60, rx));
+      applyTransform();
     };
-    const onUp = () => { dragging = false; scene.style.transition = "transform .25s ease-out"; };
-    const onDbl = () => { scene.style.transform = "rotateY(0deg) rotateX(0deg)"; };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      scene.style.cursor = "grab";
+      raf = requestAnimationFrame(inertia);
+    };
+    const onDbl = () => { vx = 0; vy = 0; rx = 0; ry = 0; applyTransform(); };
 
     scene.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     scene.addEventListener("dblclick", onDbl);
+
+    // Expose pour _exportPng (reset parallaxe avant capture)
+    this._resetParallax = () => {
+      if (l3) l3.style.transform = "";
+      if (l4) l4.style.transform = "";
+      if (sheen) sheen.style.opacity = "0";
+    };
+    this._restoreParallax = () => applyTransform();
   }
 
   // ---------- Calibration ----------
@@ -669,6 +718,8 @@ export class CyberpunkCardApp extends FormApplication {
     scene.style.transition = "none";
     scene.style.transform = "rotateY(0deg) rotateX(0deg)";
     if (back) back.style.display = "none";
+    // Reset parallaxe pour une capture propre (pas de décalage des couches)
+    this._resetParallax?.();
 
     let canvas;
     try {
@@ -680,11 +731,12 @@ export class CyberpunkCardApp extends FormApplication {
         logging: false
       });
     } finally {
-      // Restaurer les src originaux et la 3D
+      // Restaurer les src originaux, la 3D et le parallaxe
       imgEls.forEach((img, i) => { if (origSrcs[i]) img.src = origSrcs[i]; });
       scene.style.transform = sceneTransform;
       scene.style.transition = sceneTransition;
       if (back) back.style.display = backDisplay ?? "";
+      this._restoreParallax?.();
     }
 
     const dataUrl = canvas.toDataURL("image/png");

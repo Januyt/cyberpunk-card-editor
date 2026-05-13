@@ -129,7 +129,28 @@
 .cpk-card-app .cpk-card img {
   position: absolute; inset: 0; width: 100%; height: 100%;
 }
-.cpk-card-app .cpk-base-art { z-index: 1; object-fit: cover; }
+
+/* ── Système de couches parallaxe ───────────────────────────────────────────
+   Les couches L3 et L4 sont décalées en X/Y par JS (sens inverse de la
+   rotation) pour donner l'illusion que la frame "flotte" au-dessus du fond. */
+.cpk-card-app .cpk-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  will-change: transform;
+}
+/* L1 : fond — statique */
+.cpk-card-app .cpk-layer-1 { z-index: 1; }
+/* L2 : portrait — collé à la carte */
+.cpk-card-app .cpk-layer-2 { z-index: 2; }
+/* L3 : frame — flotte légèrement, décalé par JS */
+.cpk-card-app .cpk-layer-3 { z-index: 3; pointer-events: none; }
+/* L4 : texte + détails — flotte le plus, décalé davantage par JS */
+.cpk-card-app .cpk-layer-4 { z-index: 4; pointer-events: none; }
+
+/* Images internes aux layers */
+.cpk-card-app .cpk-base-art  { object-fit: cover; }
+.cpk-card-app .cpk-frame-art { object-fit: cover; pointer-events: none; }
 
 /* ── Fenêtre photo ──────────────────────────────────────────────────────────
    Conteneur positionné sur la fenêtre du frame. overflow:hidden découpe
@@ -163,11 +184,32 @@
 }
 .cpk-card-app .cpk-fit-blur .cpk-character-art-bg { display: block; }
 
-.cpk-card-app .cpk-frame-art { z-index: 3; pointer-events: none; object-fit: cover; }
+/* Reflet holographique (sheen) — suit l'inclinaison de la carte */
+.cpk-card-app .cpk-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.22) 0%, transparent 55%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+/* Coins décoratifs cyan (layer 4) */
+.cpk-card-app .cpk-corner {
+  position: absolute;
+  width: 22px; height: 22px;
+  border-color: rgba(0,220,255,0.65);
+  border-style: solid;
+}
+.cpk-card-app .cpk-corner-tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; border-radius: 3px 0 0 0; }
+.cpk-card-app .cpk-corner-tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; border-radius: 0 3px 0 0; }
+.cpk-card-app .cpk-corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; border-radius: 0 0 0 3px; }
+.cpk-card-app .cpk-corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; border-radius: 0 0 3px 0; }
 
 .cpk-card-app .cpk-zone {
   position: absolute;
-  z-index: 4;
   transform: translate(-50%, -50%);
   white-space: nowrap;
   text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 6px rgba(0,234,255,.4);

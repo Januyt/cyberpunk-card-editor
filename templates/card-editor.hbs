@@ -65,21 +65,39 @@
   <main class="cpk-preview">
     <div class="cpk-card-scene">
       <div class="cpk-card cpk-card-front cpk-fit-{{photoFit}}">
-        <img class="cpk-base-art" src="{{baseArt}}" alt="" crossorigin="anonymous">
 
-        {{!-- Fenêtre photo : conteneur positionné + overflow:hidden pour découper l'image --}}
-        <div class="cpk-photo-window">
-          <img class="cpk-character-art-bg" src="{{characterArt}}" alt="" aria-hidden="true" {{#unless characterArt}}style="display:none"{{/unless}}>
-          <img class="cpk-character-art" src="{{characterArt}}" alt="" {{#unless characterArt}}style="display:none"{{/unless}}>
+        {{!-- L1 : fond de carte --}}
+        <div class="cpk-layer cpk-layer-1">
+          <img class="cpk-base-art" src="{{baseArt}}" alt="" crossorigin="anonymous">
         </div>
 
-        <img class="cpk-frame-art" src="{{frameArt}}" alt="" crossorigin="anonymous">
+        {{!-- L2 : portrait (collé à la carte, fenêtre découpée par overflow:hidden) --}}
+        <div class="cpk-layer cpk-layer-2">
+          <div class="cpk-photo-window">
+            <img class="cpk-character-art-bg" src="{{characterArt}}" alt="" aria-hidden="true" {{#unless characterArt}}style="display:none"{{/unless}}>
+            <img class="cpk-character-art" src="{{characterArt}}" alt="" {{#unless characterArt}}style="display:none"{{/unless}}>
+          </div>
+        </div>
 
-        <div class="cpk-zone cpk-name">{{name}}</div>
-        <div class="cpk-zone cpk-subtitle">{{subtitle}}</div>
-        {{#unless isSimple}}
-        <div class="cpk-zone cpk-quote">{{quote}}</div>
-        {{/unless}}
+        {{!-- L3 : frame artwork (flotte, décalage parallaxe léger) --}}
+        <div class="cpk-layer cpk-layer-3">
+          <img class="cpk-frame-art" src="{{frameArt}}" alt="" crossorigin="anonymous">
+        </div>
+
+        {{!-- L4 : texte + coins + reflet holographique (flotte le plus, décalage parallaxe fort) --}}
+        <div class="cpk-layer cpk-layer-4">
+          <div class="cpk-zone cpk-name">{{name}}</div>
+          <div class="cpk-zone cpk-subtitle">{{subtitle}}</div>
+          {{#unless isSimple}}
+          <div class="cpk-zone cpk-quote">{{quote}}</div>
+          {{/unless}}
+          <div class="cpk-corner cpk-corner-tl"></div>
+          <div class="cpk-corner cpk-corner-tr"></div>
+          <div class="cpk-corner cpk-corner-bl"></div>
+          <div class="cpk-corner cpk-corner-br"></div>
+          <div class="cpk-sheen"></div>
+        </div>
+
       </div>
 
       <div class="cpk-card cpk-card-back">
