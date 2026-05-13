@@ -2,7 +2,7 @@
   "id": "cyberpunk-card-editor",
   "title": "Cyberpunk Card Editor",
   "description": "Génère une carte de personnage style trading-card (recto/verso) à partir des Actors du système Cyberpunk RED Core. Auto-rempli depuis la fiche, ajustable manuellement, calibration drag-to-rotate, export HTML autonome.",
-  "version": "1.9.0",
+  "version": "1.8.2",
   "compatibility": {
     "minimum": "11",
     "verified": "12",
